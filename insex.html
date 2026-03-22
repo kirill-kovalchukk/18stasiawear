@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18stasiawear — Exclusive Online Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Montserrat', sans-serif; background: #faf9f6; overflow-x: hidden; scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Быстрые и плавные переходы */
+        .transition-soft { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #d4af37; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card { animation: fadeInUp 0.4s ease forwards; }
+    </style>
+</head>
+<body x-data="shopControl()" x-init="init()">
+
+    <div x-show="showToast" x-transition x-cloak class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-black text-white px-8 py-4 rounded-full shadow-2xl flex items-center space-x-4">
+        <i data-lucide="check" class="text-[#d4af37] w-5 h-5"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest">Добавлено в гардероб</span>
+    </div>
+
+    <div x-show="mobileMenu" x-cloak class="fixed inset-0 z-[150] bg-white p-10 flex flex-col items-center justify-center space-y-8 text-2xl font-serif italic animate__animated animate__fadeInLeft">
+        <button @click="mobileMenu = false" class="absolute top-10 right-10"><i data-lucide="x" class="w-8 h-8"></i></button>
+        <a href="#catalog" @click="mobileMenu = false">Каталог</a>
+        <a href="#about" @click="mobileMenu = false">О бренде</a>
+        <a href="#shipping" @click="mobileMenu = false">Доставка</a>
+        <a href="#footer" @click="mobileMenu = false">Контакты</a>
+    </div>
+
+    <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md border-b border-stone-100 px-6 py-4 lg:py-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <button @click="mobileMenu = true" class="lg:hidden p-2"><i data-lucide="menu"></i></button>
+
+            <div class="hidden lg:flex flex-1 space-x-10 text-[10px] font-bold uppercase tracking-[0.3em]">
+                <a href="#catalog" class="hover:text-[#d4af37] transition-soft">Коллекции</a>
+                <a href="#about" class="hover:text-[#d4af37] transition-soft">Бренд</a>
+            </div>
+            
+            <div class="text-2xl lg:text-4xl font-serif tracking-tighter cursor-pointer text-center" @click="window.scrollTo(0,0)">18stasiawear</div>
+            
+            <div class="flex-1 flex justify-end items-center space-x-6">
+                <div class="relative cursor-pointer group" @click="isCartOpen = true">
+                    <i data-lucide="shopping-bag" class="w-6 h-6 group-hover:scale-110 transition-soft"></i>
+                    <span class="absolute -top-2 -right-2 bg-black text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold" x-text="cart.length"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative h-[85vh] flex items-center justify-center">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2070" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-stone-900/10"></div>
+        <div class="relative text-center text-white px-4">
+            <h2 class="text-[10px] lg:text-[12px] uppercase tracking-[0.8em] mb-4 animate__animated animate__fadeInDown animate__faster">Online Exclusive</h2>
+            <h1 class="text-5xl lg:text-8xl font-serif italic mb-8 animate__animated animate__fadeInUp animate__faster">Pure Silk & Grace</h1>
+            <a href="#catalog" class="inline-block px-12 py-4 bg-white text-black text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#d4af37] hover:text-white transition-soft rounded-full shadow-2xl">Перейти к покупкам</a>
+        </div>
+    </header>
+
+    <section id="catalog" class="max-w-7xl mx-auto px-6 py-32">
+        <div class="flex flex-col lg:row justify-between items-end mb-20 gap-8">
+            <div class="max-w-lg">
+                <h2 class="text-4xl lg:text-6xl font-serif italic mb-6">Каталог</h2>
+                <div class="flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                    <button @click="filter = 'all'" :class="{'text-black border-b-2 border-[#d4af37] pb-1': filter === 'all'}" class="transition-soft">Все изделия</button>
+                    <button @click="filter = 'Suits'" :class="{'text-black border-b-2 border-[#d4af37] pb-1': filter === 'Suits'}" class="transition-soft">Костюмы</button>
+                    <button @click="filter = 'Shirts'" :class="{'text-black border-b-2 border-[#d4af37] pb-1': filter === 'Shirts'}" class="transition-soft">Рубашки</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+            <template x-for="product in filteredProducts" :key="product.id">
+                <div class="group animate-card cursor-pointer" @click="openQuickView(product)">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-stone-100 mb-6 rounded-lg">
+                        <img :src="product.image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <button class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-8 py-3 text-[9px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-soft shadow-xl rounded-full translate-y-4 group-hover:translate-y-0">Быстрый просмотр</button>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-sm font-medium tracking-wide uppercase" x-text="product.name"></h3>
+                            <p class="text-stone-400 text-[10px] uppercase tracking-widest mt-1" x-text="product.type"></p>
+                        </div>
+                        <p class="text-sm font-bold" x-text="product.price + ' ₴'"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+
+    <section id="about" class="py-32 bg-[#1a1a1a] text-white">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div class="grid grid-cols-2 gap-4">
+                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600" class="w-full h-80 object-cover rounded-sm">
+                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600" class="w-full h-80 object-cover rounded-sm mt-12">
+            </div>
+            <div class="space-y-8">
+                <h3 class="text-5xl font-serif italic">Эстетика 18stasiawear</h3>
+                <p class="text-stone-400 leading-relaxed font-light text-lg">Мы создаем одежду для тех, кто понимает: истинная роскошь — это тишина, качественные материалы и идеальная посадка. Каждое изделие выпускается ограниченным тиражом в нашем онлайн-магазине.</p>
+                <div class="pt-6 border-t border-stone-800">
+                    <p class="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Handcrafted with love</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="shipping" class="py-32 max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+            <div class="text-center space-y-4">
+                <i data-lucide="package" class="mx-auto w-10 h-10 text-[#d4af37]"></i>
+                <h4 class="font-bold text-xs uppercase tracking-widest">Курьерская доставка</h4>
+                <p class="text-sm text-stone-500 font-light">Доставляем прямо в вашу почту.</p>
+            </div>
+            <div class="text-center space-y-4">
+                <i data-lucide="user-check" class="mx-auto w-10 h-10 text-[#d4af37]"></i>
+                <h4 class="font-bold text-xs uppercase tracking-widest">Безупречный сервис</h4>
+                <p class="text-sm text-stone-500 font-light">Наши менеджеры помогут подобрать размер онлайн в WhatsApp.</p>
+            </div>
+            <div class="text-center space-y-4">
+                <i data-lucide="shield-check" class="mx-auto w-10 h-10 text-[#d4af37]"></i>
+                <h4 class="font-bold text-xs uppercase tracking-widest">Гарантия качества</h4>
+                <p class="text-sm text-stone-500 font-light">Премиальные ткани и шерсть.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer id="footer" class="bg-white border-t border-stone-100 pt-24 pb-12">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
+            <div class="space-y-8">
+                <h3 class="text-3xl font-serif italic tracking-tighter">18stasiawear</h3>
+                <div class="flex space-x-4">
+                    <a href="https://www.instagram.com/18stasiawear/" class="w-10 h-10 border border-stone-200 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-soft">
+                        <i data-lucide="instagram"  class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-bold text-[10px] uppercase tracking-[0.2em] mb-8 text-stone-400">Навигация</h4>
+                <ul class="space-y-4 text-sm font-medium">
+                    <li><a href="#catalog" class="hover:text-[#d4af37] transition-soft">Новая коллекция</a></li>
+                    <li><a href="#about" class="hover:text-[#d4af37] transition-soft">История бренда</a></li>
+                    <li><a href="#shipping" class="hover:text-[#d4af37] transition-soft">Доставка</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-[10px] uppercase tracking-[0.2em] mb-8 text-stone-400">Инфо</h4>
+                <ul class="space-y-4 text-sm font-medium">
+                    <li><button @click="openInfo('care')" class="hover:text-[#d4af37] transition-soft uppercase text-[12px] text-left">Уход за вещами</button></li>
+                    <li><button @click="openInfo('size')" class="hover:text-[#d4af37] transition-soft uppercase text-[12px] text-left">Таблица размеров</button></li>
+                    <li><button @click="openInfo('policy')" class="hover:text-[#d4af37] transition-soft uppercase text-[12px] text-left">Публичная оферта</button></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-[10px] uppercase tracking-[0.2em] mb-8 text-stone-400">Связь с нами</h4>
+                <ul class="space-y-4 text-sm">
+                    <li class="font-bold">18stasiawear.com</li>
+                    <li class="text-stone-500 italic">Ежедневно с 10:00 до 22:00</li>
+                    <li><a href="#" class="inline-block border-b-2 border-black pb-1 text-[10px] font-bold uppercase tracking-widest hover:text-[#d4af37] hover:border-[#d4af37] transition-soft">WhatsApp Чат</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center text-[9px] uppercase tracking-[0.3em] text-stone-400 border-t border-stone-50 pt-10">
+            © 2026 18stasiawear Online Store. Все права защищены.
+        </div>
+    </footer>
+
+    <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-soft" @click="isModalOpen = false"></div>
+        <div class="bg-white w-full max-w-5xl rounded-sm flex flex-col lg:flex-row relative z-10 animate__animated animate__zoomIn animate__faster">
+            <button @click="isModalOpen = false" class="absolute top-6 right-6 hover:rotate-90 transition-soft z-20"><i data-lucide="x" class="w-8 h-8"></i></button>
+            
+            <div class="lg:w-1/2 h-[400px] lg:h-auto overflow-hidden">
+                <img :src="activeProduct?.image" class="w-full h-full object-cover">
+            </div>
+
+            <div class="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center">
+                <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-[#d4af37] mb-4" x-text="activeProduct?.type"></p>
+                <h2 class="text-4xl font-serif italic mb-6" x-text="activeProduct?.name"></h2>
+                <p class="text-2xl font-light mb-10 text-stone-900" x-text="activeProduct?.price + ' ₴'"></p>
+
+                <div class="mb-8">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-4">Цвет: <span x-text="selectedColor"></span></h4>
+                    <div class="flex space-x-3">
+                        <template x-for="c in ['Sand', 'Black', 'Graphite']">
+                            <button @click="selectedColor = c" 
+                                    :class="selectedColor === c && 'ring-2 ring-black ring-offset-4'"
+                                    class="w-8 h-8 rounded-full border border-stone-200 transition-soft"
+                                    :style="`background-color: ${c === 'Sand' ? '#E5D3B3' : c === 'Black' ? '#1a1a1a' : '#4a4a4a'}`">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-4">Размер:</h4>
+                    <div class="flex space-x-2">
+                        <template x-for="s in ['XS', 'S', 'M', 'L']">
+                            <button @click="selectedSize = s" :class="{'bg-black text-white': selectedSize === s}" class="w-12 h-12 border border-stone-200 text-xs font-bold transition-soft hover:border-black" x-text="s"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <button @click="addToCart(activeProduct)" class="w-full py-6 bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#d4af37] transition-soft shadow-2xl">
+                    Добавить в корзину
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="infoModal" x-cloak class="fixed inset-0 z-[250] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="infoModal = null"></div>
+        <div class="bg-white max-w-md w-full p-10 relative z-10 animate__animated animate__fadeInUp animate__faster">
+            <button @click="infoModal = null" class="absolute top-4 right-4"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="text-2xl font-serif italic mb-6" x-text="infoTitle"></h3>
+            <div class="text-[12px] text-stone-500 leading-relaxed" x-text="infoText"></div>
+        </div>
+    </div>
+
+    <div x-show="isCartOpen" x-cloak class="fixed inset-0 z-[210]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isCartOpen = false"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white p-10 shadow-2xl animate__animated animate__slideInRight animate__faster">
+            <div class="flex justify-between items-center mb-16">
+                <h2 class="text-3xl font-serif italic">Корзина</h2>
+                <button @click="isCartOpen = false"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="space-y-8 overflow-y-auto h-[60vh] pr-4">
+                <template x-for="(item, index) in cart" :key="item.cartId">
+                    <div class="flex space-x-6">
+                        <div class="w-20 h-28 flex-shrink-0 overflow-hidden rounded">
+                            <img :src="item.image" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <h4 class="text-[10px] font-bold uppercase tracking-widest" x-text="item.name"></h4>
+                            <p class="text-[10px] text-stone-400"><span x-text="item.size"></span> / <span x-text="item.color"></span></p>
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-sm font-bold" x-text="item.price + ' ₴'"></span>
+                                <button @click="removeFromCart(index)" class="text-red-400 text-[10px] font-bold uppercase border-b border-red-400 transition-soft hover:text-black hover:border-black">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="cart.length === 0" class="text-center py-20 text-stone-300 italic">Ваша корзина пустая...</div>
+            </div>
+
+            <div class="absolute bottom-10 left-10 right-10 pt-8 border-t">
+                <div class="flex justify-between items-end mb-8">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">К оплате</span>
+                    <span class="text-3xl font-serif italic" x-text="totalPrice + ' ₴'"></span>
+                </div>
+                <button class="w-full py-6 bg-black text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-soft">Оформить заказ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function shopControl() {
+            return {
+                filter: 'all',
+                isModalOpen: false,
+                isCartOpen: false,
+                mobileMenu: false,
+                showToast: false,
+                infoModal: null,
+                infoTitle: '',
+                infoText: '',
+                activeProduct: null,
+                selectedSize: 'S',
+                selectedColor: 'Sand',
+                cart: JSON.parse(localStorage.getItem('18stasia_cart')) || [],
+                
+                products: [
+                    { id: 1, type: 'Suits', name: "Костюм 'Iconic Ivory'", price: 34500, image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800" },
+                    { id: 2, type: 'Suits', name: "Жакет 'Noir Structure'", price: 21200, image: "https://images.unsplash.com/photo-1548272181-1a117d5e8d47?q=80&w=800" },
+                    { id: 3, type: 'Shirts', name: "Рубашка 'Silk Cloud'", price: 15800, image: "https://images.unsplash.com/photo-1551163943-3f6a855d1153?q=80&w=800" },
+                    { id: 4, type: 'Shirts', name: "Блуза 'Pearl Satin'", price: 12900, image: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=800" },
+                    { id: 5, type: 'Suits', name: "Брюки 'High Palazzo'", price: 18400, image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800" },
+                    { id: 6, type: 'Suits', name: "Тренч 'Midnight Dust'", price: 42000, image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=800" }
+                ],
+
+                get filteredProducts() {
+                    return this.filter === 'all' ? this.products : this.products.filter(p => p.type === this.filter);
+                },
+
+                openQuickView(product) {
+                    this.activeProduct = product;
+                    this.selectedSize = 'S';
+                    this.selectedColor = 'Sand';
+                    this.isModalOpen = true;
+                    this.$nextTick(() => lucide.createIcons());
+                },
+
+                openInfo(type) {
+                    this.infoModal = true;
+                    if(type === 'care') {
+                        this.infoTitle = 'Уход за вещами';
+                        this.infoText = 'Рекомендуется ручная стирка при 30 градусах или деликатная химчистка. Гладить с изнаночной стороны.';
+                    } else if(type === 'size') {
+                        this.infoTitle = 'Таблица размеров';
+                        this.infoText = 'Наши размеры соответствуют стандартной сетке: XS (40), S (42), M (44), L (46).';
+                    } else {
+                        this.infoTitle = 'Публичная оферта';
+                        this.infoText = 'Оформляя заказ, вы соглашаетесь с условиями обработки данных и правилами возврата в течение 14 дней.';
+                    }
+                },
+
+                addToCart(product) {
+                    const cartItem = {
+                        ...product,
+                        size: this.selectedSize,
+                        color: this.selectedColor,
+                        cartId: Date.now() + Math.random()
+                    };
+                    this.cart.push(cartItem);
+                    this.saveCart();
+                    this.isModalOpen = false;
+                    this.showToast = true;
+                    setTimeout(() => this.showToast = false, 3000);
+                },
+
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                    this.saveCart();
+                },
+
+                saveCart() {
+                    localStorage.setItem('18stasia_cart', JSON.stringify(this.cart));
+                },
+
+                get totalPrice() {
+                    return this.cart.reduce((sum, item) => sum + item.price, 0);
+                },
+
+                init() {
+                    lucide.createIcons();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
