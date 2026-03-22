@@ -55,7 +55,7 @@
             <div class="text-2xl lg:text-4xl font-serif tracking-tighter cursor-pointer text-center" @click="window.scrollTo(0,0)">18stasiawear</div>
             
             <div class="flex-1 flex justify-end items-center space-x-6">
-                <div class="relative cursor-pointer group" @click="isCartOpen = true">
+                <div class="relative cursor-pointer group" @click="isModalOpen = false; isCartOpen = true">
                     <i data-lucide="shopping-bag" class="w-6 h-6 group-hover:scale-110 transition-soft"></i>
                     <span class="absolute -top-2 -right-2 bg-black text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold" x-text="cart.length"></span>
                 </div>
