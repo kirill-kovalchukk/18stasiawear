@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>18stasiawear — Exclusive Online Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -26,15 +26,46 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-card { animation: fadeInUp 0.4s ease forwards; }
+
+        /* --- АДАПТИВНЫЕ ФИКСЫ ДЛЯ МОДАЛЬНЫХ ОКОН --- */
+        /* Модальное окно товара (быстрый просмотр) */
+        @media (max-width: 1024px) {
+            .modal-product-container {
+                max-height: 90vh;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .modal-product-content {
+                max-height: 90vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        /* Для любых модальных окон на мобильных делаем прокручиваемыми */
+        @media (max-width: 768px) {
+            .modal-scrollable {
+                max-height: 85vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            /* Корзина на мобильных — чтобы тоже не вылезала */
+            .cart-mobile-scroll {
+                max-height: 60vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
     </style>
 </head>
 <body x-data="shopControl()" x-init="init()">
 
     <div x-show="showToast" x-transition x-cloak class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-black text-white px-8 py-4 rounded-full shadow-2xl flex items-center space-x-4">
         <i data-lucide="check" class="text-[#d4af37] w-5 h-5"></i>
-        <span class="text-[10px] font-bold uppercase tracking-widest">Добавлено в гардероб</span>
+        <span class="text-[10px] font-bold uppercase tracking-widest">Добавлено в корзину</span>
     </div>
 
+    <!-- Мобильное меню -->
     <div x-show="mobileMenu" x-cloak class="fixed inset-0 z-[150] bg-white p-10 flex flex-col items-center justify-center space-y-8 text-2xl font-serif italic animate__animated animate__fadeInLeft">
         <button @click="mobileMenu = false" class="absolute top-10 right-10"><i data-lucide="x" class="w-8 h-8"></i></button>
         <a href="#catalog" @click="mobileMenu = false">Каталог</a>
@@ -43,6 +74,7 @@
         <a href="#footer" @click="mobileMenu = false">Контакты</a>
     </div>
 
+    <!-- Навигация -->
     <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md border-b border-stone-100 px-6 py-4 lg:py-6">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <button @click="mobileMenu = true" class="lg:hidden p-2"><i data-lucide="menu"></i></button>
@@ -63,6 +95,7 @@
         </div>
     </nav>
 
+    <!-- Hero -->
     <header class="relative h-[85vh] flex items-center justify-center">
         <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2070" class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-stone-900/10"></div>
@@ -73,6 +106,7 @@
         </div>
     </header>
 
+    <!-- Каталог -->
     <section id="catalog" class="max-w-7xl mx-auto px-6 py-32">
         <div class="flex flex-col lg:row justify-between items-end mb-20 gap-8">
             <div class="max-w-lg">
@@ -104,6 +138,7 @@
         </div>
     </section>
 
+    <!-- О бренде -->
     <section id="about" class="py-32 bg-[#1a1a1a] text-white">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div class="grid grid-cols-2 gap-4">
@@ -120,6 +155,7 @@
         </div>
     </section>
 
+    <!-- Доставка и сервис -->
     <section id="shipping" class="py-32 max-w-7xl mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
             <div class="text-center space-y-4">
@@ -140,13 +176,14 @@
         </div>
     </section>
 
+    <!-- Footer -->
     <footer id="footer" class="bg-white border-t border-stone-100 pt-24 pb-12">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
             <div class="space-y-8">
                 <h3 class="text-3xl font-serif italic tracking-tighter">18stasiawear</h3>
                 <div class="flex space-x-4">
                     <a href="https://www.instagram.com/18stasiawear/" class="w-10 h-10 border border-stone-200 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-soft">
-                        <i data-lucide="instagram"  class="w-4 h-4"></i>
+                        <i data-lucide="instagram" class="w-4 h-4"></i>
                     </a>
                 </div>
             </div>
@@ -183,22 +220,23 @@
         </div>
     </footer>
 
-    <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <!-- МОДАЛЬНОЕ ОКНО ТОВАРА (БЫСТРЫЙ ПРОСМОТР) — ИСПРАВЛЕНА ПРОКРУТКА НА МОБИЛЬНЫХ -->
+    <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="align-items: center;">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-soft" @click="isModalOpen = false"></div>
-        <div class="bg-white w-full max-w-5xl rounded-sm flex flex-col lg:flex-row relative z-10 animate__animated animate__zoomIn animate__faster">
-            <button @click="isModalOpen = false" class="absolute top-6 right-6 hover:rotate-90 transition-soft z-20"><i data-lucide="x" class="w-8 h-8"></i></button>
+        <div class="bg-white w-full max-w-5xl rounded-sm flex flex-col lg:flex-row relative z-10 animate__animated animate__zoomIn animate__faster modal-scrollable overflow-y-auto max-h-[90vh] lg:max-h-none">
+            <button @click="isModalOpen = false" class="absolute top-6 right-6 hover:rotate-90 transition-soft z-20 bg-white/80 rounded-full p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
             
-            <div class="lg:w-1/2 h-[400px] lg:h-auto overflow-hidden">
+            <div class="lg:w-1/2 h-[300px] sm:h-[400px] lg:h-auto overflow-hidden">
                 <img :src="activeProduct?.image" class="w-full h-full object-cover">
             </div>
 
-            <div class="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center">
+            <div class="lg:w-1/2 p-6 sm:p-8 lg:p-16 flex flex-col justify-center">
                 <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-[#d4af37] mb-4" x-text="activeProduct?.type"></p>
-                <h2 class="text-4xl font-serif italic mb-6" x-text="activeProduct?.name"></h2>
-                <p class="text-2xl font-light mb-10 text-stone-900" x-text="activeProduct?.price + ' ₴'"></p>
+                <h2 class="text-3xl sm:text-4xl font-serif italic mb-4" x-text="activeProduct?.name"></h2>
+                <p class="text-xl sm:text-2xl font-light mb-6 text-stone-900" x-text="activeProduct?.price + ' ₴'"></p>
 
-                <div class="mb-8">
-                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-4">Цвет: <span x-text="selectedColor"></span></h4>
+                <div class="mb-6">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-3">Цвет: <span x-text="selectedColor"></span></h4>
                     <div class="flex space-x-3">
                         <template x-for="c in ['Sand', 'Black', 'Graphite']">
                             <button @click="selectedColor = c" 
@@ -210,48 +248,52 @@
                     </div>
                 </div>
 
-                <div class="mb-10">
-                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-4">Размер:</h4>
-                    <div class="flex space-x-2">
+                <div class="mb-8">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest mb-3">Размер:</h4>
+                    <div class="flex flex-wrap gap-2">
                         <template x-for="s in ['XS', 'S', 'M', 'L']">
                             <button @click="selectedSize = s" :class="{'bg-black text-white': selectedSize === s}" class="w-12 h-12 border border-stone-200 text-xs font-bold transition-soft hover:border-black" x-text="s"></button>
                         </template>
                     </div>
                 </div>
 
-                <button @click="addToCart(activeProduct)" class="w-full py-6 bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#d4af37] transition-soft shadow-2xl">
+                <button @click="addToCart(activeProduct)" class="w-full py-5 sm:py-6 bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#d4af37] transition-soft shadow-2xl">
                     Добавить в корзину
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Информационные модалки (уход, размеры, оферта) -->
     <div x-show="infoModal" x-cloak class="fixed inset-0 z-[250] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="infoModal = null"></div>
-        <div class="bg-white max-w-md w-full p-10 relative z-10 animate__animated animate__fadeInUp animate__faster">
+        <div class="bg-white max-w-md w-full p-8 relative z-10 animate__animated animate__fadeInUp animate__faster max-h-[85vh] overflow-y-auto modal-scrollable">
             <button @click="infoModal = null" class="absolute top-4 right-4"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-2xl font-serif italic mb-6" x-text="infoTitle"></h3>
             <div class="text-[12px] text-stone-500 leading-relaxed" x-text="infoText"></div>
         </div>
     </div>
 
+    <!-- Корзина — адаптивная прокрутка -->
     <div x-show="isCartOpen" x-cloak class="fixed inset-0 z-[210]">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="isCartOpen = false"></div>
-        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white p-10 shadow-2xl animate__animated animate__slideInRight animate__faster">
-            <div class="flex justify-between items-center mb-16">
-                <h2 class="text-3xl font-serif italic">Корзина</h2>
-                <button @click="isCartOpen = false"><i data-lucide="x"></i></button>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col animate__animated animate__slideInRight animate__faster">
+            <div class="p-6 sm:p-8 flex-shrink-0 border-b border-stone-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-3xl font-serif italic">Корзина</h2>
+                    <button @click="isCartOpen = false"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
             </div>
 
-            <div class="space-y-8 overflow-y-auto h-[60vh] pr-4">
+            <div class="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 cart-mobile-scroll" style="max-height: 60vh;">
                 <template x-for="(item, index) in cart" :key="item.cartId">
-                    <div class="flex space-x-6">
-                        <div class="w-20 h-28 flex-shrink-0 overflow-hidden rounded">
+                    <div class="flex space-x-5">
+                        <div class="w-20 h-28 flex-shrink-0 overflow-hidden rounded bg-stone-100">
                             <img :src="item.image" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 space-y-2">
-                            <h4 class="text-[10px] font-bold uppercase tracking-widest" x-text="item.name"></h4>
-                            <p class="text-[10px] text-stone-400"><span x-text="item.size"></span> / <span x-text="item.color"></span></p>
+                            <h4 class="text-[11px] font-bold uppercase tracking-widest" x-text="item.name"></h4>
+                            <p class="text-[10px] text-stone-500"><span x-text="item.size"></span> / <span x-text="item.color"></span></p>
                             <div class="flex justify-between items-center pt-2">
                                 <span class="text-sm font-bold" x-text="item.price + ' ₴'"></span>
                                 <button @click="removeFromCart(index)" class="text-red-400 text-[10px] font-bold uppercase border-b border-red-400 transition-soft hover:text-black hover:border-black">Удалить</button>
@@ -259,15 +301,15 @@
                         </div>
                     </div>
                 </template>
-                <div x-show="cart.length === 0" class="text-center py-20 text-stone-300 italic">Ваша корзина пустая...</div>
+                <div x-show="cart.length === 0" class="text-center py-16 text-stone-300 italic text-sm">Ваша корзина пустая...</div>
             </div>
 
-            <div class="absolute bottom-10 left-10 right-10 pt-8 border-t">
-                <div class="flex justify-between items-end mb-8">
+            <div class="p-6 sm:p-8 border-t border-stone-100 flex-shrink-0 bg-white">
+                <div class="flex justify-between items-end mb-6">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">К оплате</span>
-                    <span class="text-3xl font-serif italic" x-text="totalPrice + ' ₴'"></span>
+                    <span class="text-2xl sm:text-3xl font-serif italic" x-text="totalPrice + ' ₴'"></span>
                 </div>
-                <button class="w-full py-6 bg-black text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-soft">Оформить заказ</button>
+                <button class="w-full py-5 bg-black text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-soft">Оформить заказ</button>
             </div>
         </div>
     </div>
@@ -306,7 +348,7 @@
                     this.selectedSize = 'S';
                     this.selectedColor = 'Sand';
                     this.isModalOpen = true;
-                    this.$nextTick(() => lucide.createIcons());
+                    setTimeout(() => lucide.createIcons(), 50);
                 },
 
                 openInfo(type) {
@@ -352,6 +394,9 @@
 
                 init() {
                     lucide.createIcons();
+                    // Обновляем иконки при любых изменениях DOM
+                    const observer = new MutationObserver(() => lucide.createIcons());
+                    observer.observe(document.body, { childList: true, subtree: true });
                 }
             }
         }
